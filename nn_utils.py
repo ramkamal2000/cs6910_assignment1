@@ -143,8 +143,8 @@ class activation:
 def set_nn_shape(verbose=True, num_hidden_layers=-1, hidden_layer_size=-1):
 
   input_layer_size = 784
-  hidden_layer_size = -1
-  num_hidden_layers = -1
+  hidden_layer_size = hidden_layer_size
+  num_hidden_layers = num_hidden_layers
   output_layer_size = 10
 
   if (verbose):
