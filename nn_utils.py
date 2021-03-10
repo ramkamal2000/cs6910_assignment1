@@ -140,7 +140,7 @@ class activation:
     e_x = np.exp(x - np.max(x)+200)
     return e_x / e_x.sum()
 
-def set_nn_shape(verbose=True, hidden_layer_size=-1, num_hidden_layers=-1):
+def set_nn_shape(verbose=True, num_hidden_layers=-1, hidden_layer_size=-1):
 
   input_layer_size = 784
   hidden_layer_size = -1
