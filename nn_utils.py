@@ -10,7 +10,7 @@ class neural_network:
     self.biases_list = []
     self.dict_layers= dict_layers
 
-    self.weights_list, self.biases_list = wandb_initializer.random(dict_layers, self.weights_list, self.biases_list)
+    self.weights_list, self.biases_list = wandb_initializer(dict_layers, self.weights_list, self.biases_list, initializer)
 
   # function to compute forward propogation
   def forward_prop(self, W, b, x, y):
