@@ -13,7 +13,7 @@ class neural_network:
     self.weights_list, self.biases_list = wandb_initializer(dict_layers, self.weights_list, self.biases_list, initializer)
 
   # function to compute forward propogation
-  def forward_prop(self, W, b, x, y):
+  def forward_prop(self, W, b, x, y,activation_func):
 
     a = []
     h = []
@@ -29,7 +29,8 @@ class neural_network:
       h.append(h_pre)
     
     a.append(W[L] @ h_pre + b[L])
-    y_hat = activation.softmax(a[L])
+    act = activation()
+    y_hat = getattr(act,activation_func)(a[L])
 
     #print(y_hat)
     return {
@@ -38,12 +39,12 @@ class neural_network:
         'y_hat' : y_hat
     }
 
-  def self_forward_prop(self,x,y) :
+  def self_forward_prop(self,x,y,activation_func) :
 
-    temp = self.forward_prop(self.weights_list,self.biases_list,x,y)
+    temp = self.forward_prop(self.weights_list,self.biases_list,x,y,activation_func)
     return temp
 
-  def back_prop(self, W, b, a, h, y_hat, x, y):
+  def back_prop(self, W, b, a, h, y_hat, x, y,activation_func):
 
     del_w = [] 
     del_b = []
@@ -59,53 +60,54 @@ class neural_network:
 
       temp1 = grad_a.reshape(-1,1)
       if i==0 :
-
         temp2 = x.reshape((1,-1))
       else :
-
         temp2 = h[i-1].reshape((1,-1))
       del_w.append(temp1 @ temp2)
       del_b.append(grad_a)
 
       if(i!=0) :
-
-        grad_h = W[i].T @ grad_a
-        grad_a = grad_h * activation.sigmoid_der(h[i-1])
+        grad_h = W[i].T @ grad_a      
+        act = activation()
+        grad_a = grad_h * getattr(act,activation_func+'_der')(h[i-1])
 
     return {
         'dw' : del_w,
         'db' : del_b
     }
 
-  def self_back_prop(self, a, h, y_hat, x, y) :
-    temp = self.back_prop(self.weights_list,self.biases_list, a, h, y_hat, x, y)
+  def self_back_prop(self, a, h, y_hat, x, y,activation_func) :
+    temp = self.back_prop(self.weights_list,self.biases_list, a, h, y_hat, x, y,activation_func)
     return temp
 
-  def grad_wandb(self, W, b, x, y):
+  def grad_wandb(self, W, b, x, y,activation_func):
     x = x.reshape((-1,1))
-    temp = self.forward_prop(W,b,x,y)
-    temp2 = self.back_prop(W, b, temp['a'], temp['h'], temp['y_hat'], x, y)
+    temp = self.forward_prop(W,b,x,y,activation_func)
+    temp2 = self.back_prop(W, b, temp['a'], temp['h'], temp['y_hat'], x, y,activation_func)
 
     return {
         'dw' : temp2['dw'],
         'db' : temp2['db']
     }
 
-  def self_grad_wandb(self,x,y) :
-    temp = self.grad_wandb(self.weights_list, self.biases_list, x, y)
+  def self_grad_wandb(self,x,y,activation_func) :
+    temp = self.grad_wandb(self.weights_list, self.biases_list, x, y,activation_func)
     return temp
 
-  def predict(self, x):
-    temp = self.forward_prop(self.weights_list,self.biases_list,x, 0)
-    return np.argmax(temp['y_hat'])
+  def predict(self, x,activation_func):
+    temp = self.forward_prop(self.weights_list,self.biases_list,x, 0,activation_func)
+    return {
+      'y' : np.argmax(temp['y_hat']),
+      'y_hat' : temp['y_hat']
+    }
 
-  def update_vals(self,dw,db,w_etas,b_etas) :
+  def update_vals(self,dw,db) :
     L = len(self.weights_list)
     for i in range(L) :
-      self.weights_list[i] =self.weights_list[i] - w_etas[L-i-1]*dw[L-i-1]
+      self.weights_list[i] =self.weights_list[i] - dw[L-i-1]
 
     for i in range(len(self.biases_list)) :
-      self.biases_list[i] =self.biases_list[i] - b_etas[L-i-1]*db[L-i-1]
+      self.biases_list[i] =self.biases_list[i] - db[L-i-1]
 
 class activation:
   

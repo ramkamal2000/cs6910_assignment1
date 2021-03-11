@@ -7,7 +7,7 @@ def wandb_initializer(nn_shape, weights_list, biases_list, type='random', mu = 0
   if (type=='random'):
     initializer = tf.keras.initializers.TruncatedNormal(mean=mu, stddev=sigma)
   # xavier initialization
-  else if (type=='xavier'):
+  elif (type=='xavier'):
     initializer = tf.keras.initializers.GlorotNormal()
 
   weights_list.append(initializer(shape=(nn_shape['hidden_layer_size'], nn_shape['input_layer_size'])).numpy())
